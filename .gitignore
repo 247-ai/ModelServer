@@ -1,0 +1,10 @@
+.idea/*
+*.iml
+*.class
+*.xml
+target/*
+.idea/workspace.xml
+!pom.xml
+Docker/*.jar
+!Docker/scalatest*
+!Docker/scalactic*
