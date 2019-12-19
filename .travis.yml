@@ -1,0 +1,24 @@
+language: java
+jdk: openjdk8
+before_install:
+  - mvn clean package -Ptest
+  - cd Docker
+  - ./run-docker.sh "test"
+  - cd ..
+  - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
+  - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
+## Build and release to maven central
+script:
+  mvn -s .maven.xml clean deploy -DskipTests=true -B -U -Prelease
+before_deploy:
+  - mvn help:evaluate -N -Dexpression=project.version|grep -v '\['
+  - export project_version=$(mvn help:evaluate -N -Dexpression=project.version|grep -v '\[')
+deploy:
+  provider: releases
+  api_key:
+    secure: fdEr6561w5d9EhXvXEYYan56Tw8K4aOhl6vaBwd2CQAClw9BNJMqs+Gam33V5tvq8Ry4HsaIfPPBOJd4wE+g4uWfGIy+pRmdt0BwKMwVJwLB/cKE8kAB7LhQJmJRpR6bxWzXBXJ9A6BNBTgK9XV5jxfkIIPwkHDjTc7qID+d+UAUtOJe6+Fm0y1TIXawqKDOg1dpt1CqnU0RZbAg3nmZ2kDX1Ts9hLDjk7Px/ixLqkeNkJl0r/9bmvBMy8fCYzo/wJI4bxoX+/fd7/Qjnq/6CqJh40p0puVYMFmWHyHC6nXHM+/5/jToi1yaQZby6RQdKE/6mcsmxdzzDqyorOXtY3bithv0Wz/ykECHsoHKTF5Rc5dTQUR1fL+bHTGAlKpfNtgOfKr0xsz97STsPbbQuiEDjx0MbcKqix9v1aQPld7CsiB4zAfl3u7KNv5tc6822zm7Ysy9eMM6ToPqnX5F5m3vYocUVFv7bOPlZm0Ls9HzSzt74DD5dQarL43o0TQ64Wbk2olkAqFHCvYWDESUzIcThouVzzm4TSkom1Hw2yG6xh9JSk4/FrUtWiIWSb9CXSs80GyTWbgs8o9EZ+GlfbYGexytErNn4RYfYMUMJYLwK/N0L400koypWJMCivwx+lJJebhOtwBSD4WdKtneZ46HO4uU9krZ4m6LAwfHumQ=
+  file: "target/TravisCITryout-$project_version.jar"
+  skip_cleanup: true
+  on:
+    repo: neeleshsambhajiche/TravisCITryout
+  name: $project_version
