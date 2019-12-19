@@ -1,0 +1,248 @@
+swagger: "2.0"
+
+info:
+  description: "Model Server API lets you run the model deployment worlflows"
+  version: "1.0.0"
+  title: "Model-Server API"
+  termsOfService: "http://247.ai/terms/"
+  contact:
+    email: "dsg-flashml@247.ai"
+  license:
+    name: "Proprietry"
+    url: "http://247.ai"
+host: "modelserver.api.247.ai"
+basePath: "/modelserver/v1"
+tags:
+  - name: "User"
+    description: "User Data"
+  - name: "Models"
+    description: "Prediction models in DB"
+schemes:
+  - "https"
+
+# Define Path end-points
+paths:
+  /users:
+    get:
+      tags:
+        - "User"
+      summary: "Get user info"
+      description: "Get user info(i.e. username for the given devkey). Can be used to check if a user is registered and also to retrieve the registered userId for the given devkey."
+      produces:
+        - "application/json"
+      parameters:
+        - in: "header"
+          name: "tucana-devKey"
+          description: "The devKey for the user"
+          type: string
+          required: true
+      responses:
+        200:
+          description: "Info of the user"
+          schema:
+            $ref: "#/definitions/User"
+        403:
+          description: "Unauthorized due to missing devKey or invalid devKey"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        404:
+          description: "User Not Found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+    post:
+      tags:
+        - "User"
+      summary: "Create new User"
+      description: "Create new user and obtain the devKey. This devKey must be used for authorization in all subsequent requests."
+      operationId: "createUser"
+      produces:
+        - "application/json"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "user"
+          description: "Json block having user name and whether he needs admin permission."
+          required: true
+          schema:
+            $ref: "#/definitions/NewUser"
+      responses:
+        200:
+          description: "User created successfully"
+          schema:
+            $ref: "#/definitions/UserKey"
+        400:
+          description: "Bad Request due to insufficient parameters"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        403:
+          description: "User Already exists"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /models:
+    get:
+      tags:
+        - "Models"
+      summary: "Get the model list belong to a particular user"
+      description: "List all the models belongs to a particular user"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "header"
+          name: "tucana-devKey"
+          description: "The devKey for the user"
+          type: string
+          required: true
+      responses:
+        200:
+          description: "Models list"
+          schema:
+            $ref: "#/definitions/ModelList"
+        403:
+          description: "Unauthorized due to missing devKey or invalid devKey"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        404:
+          description: "User Not Found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+    post:
+      tags:
+        - "Models"
+      summary: "Upload the model to the server"
+      description: "Upload the model."
+      produces:
+        - "application/json"
+      consumes:
+        - "multipart/form-data"
+      parameters:
+        - in: "header"
+          name: "tucana-devKey"
+          description: "The devKey for the required user"
+          type: string
+          required: true
+        - in: "formData"
+          name: "modelId"
+          description: "Model ID with which the file to be uploaded"
+          type: string
+          required: true
+        - in: "formData"
+          name: "version"
+          description: "Version with which the model to be uploaded"
+          type: string
+          required: true
+        - in: "formData"
+          name: "description"
+          description: "Description of the model"
+          type: string
+          required: true
+        - in: "formData"
+          name: "schema"
+          description: "Schema of the model as stringified JSON.(i.e){\"fields\":[{\"type\":\"<string>\",\"name\":\"<string>\"}],\"topKCol\":\"<string>\"}"
+          required: true
+          type: string
+        - in: "formData"
+          name: "file"
+          description: "Model file to be uploaded"
+          type: "file"
+          required: true
+      responses:
+        200:
+          description: "Return the details of the uploaded model"
+          schema:
+            $ref: "#/definitions/ModelUploaded"
+        403:
+          description: "Unauthorized due to missing devKey or invalid devKey or model already exists with the given modelId and verison."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        404:
+          description: "User Not Found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+
+definitions:
+
+  User:
+    type: "object"
+    properties:
+      userId:
+        type: "string"
+        description: "User name for the given devkey."
+
+  NewUser:
+    type: "object"
+    properties:
+      userId:
+        type: "string"
+        description: "User name given for registration"
+      isAdmin:
+        type: boolean
+        description: "This is a boolean which indicates whether the user needa admin rights or not"
+
+  UserKey:
+    type: "object"
+    properties:
+      devKey:
+        type: "string"
+        description: "Random 10 digit key which will be used to authenticate the user for each and every request."
+
+  ModelList:
+    type: "object"
+    properties:
+      models:
+        type: "array"
+        description: "List of Model instances"
+        items:
+          $ref: "#/definitions/Model"
+
+  ModelUploaded:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        description: "Status of the uploaded model"
+      modelId:
+        type: "string"
+        description: "Uploaded model ID"
+      version:
+        type: "string"
+        description: "Version of the uploaded model"
+
+  Model:
+    type: "object"
+    properties:
+      lastUpdateTimeStamp:
+        type: "string"
+        format: "date-time"
+        description: "Last updated timestamp"
+      description:
+        type: "string"
+        description: "description about the model."
+      modelId:
+        type: "string"
+        description: "Unique Id created for the model"
+      version:
+        type: "string"
+        format: "Version of the model."
+      userId:
+        type: "string"
+        description: "User to which the model is associated."
+
+  ErrorResponse:
+    type: "object"
+    properties:
+      error:
+        type: "object"
+        properties:
+          code:
+            type: "integer"
+            format: "int32"
+          type:
+            type: "string"
+          message:
+            type: "string"
+      
