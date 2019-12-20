@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.247-ai</groupId>
-    <artifactId>modelserver</artifactId>
+    <artifactId>ModelServer</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>modelserver</name>
+    <name>ModelServer</name>
     <url>https://github.com/247-ai/ModelServer</url>
     <description>A Model server which helps us to create user, upload the models to db and list the models of a
         particular user

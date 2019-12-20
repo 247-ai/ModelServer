@@ -6,8 +6,8 @@ sudo docker build -t modelserver ./
 # Hostname for docker container
 dockerHostname="modelserver-docker"
 
-modelServerTestJar=`ls modelserver-*-tests.jar`
-modelServerMainJar=`ls modelserver*[^tests].jar`
+modelServerTestJar=`ls ModelServer-*-tests.jar`
+modelServerMainJar=`ls ModelServer*[^tests].jar`
 
 if [[ "$1" == "test" ]]
 then

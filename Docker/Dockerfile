@@ -28,7 +28,7 @@ ENV PATH=$PATH:$SCALA_HOME/bin
 
 RUN mkdir /modelserver
 
-COPY modelserver-*.jar /modelserver/
+COPY ModelServer-*.jar /modelserver/
 COPY flashml-noPage.zip /modelserver/
 COPY model-server-config.conf /modelserver/
 COPY run-tucana-tests.sh /modelserver/run-tucana-tests.sh
